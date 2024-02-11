@@ -1,0 +1,16 @@
+{
+  "name": "discord-pin-proxy",
+  "version": "0.0.1",
+  "main": "app.ts",
+  "dependencies": {
+    "discord-interactions": "^3.2.0",
+    "dotenv": "^16.0.0"
+  },
+  "scripts": {
+    "start": "node app.js"
+  },
+  "devDependencies": {
+    "discord-api-types": "^0.37.69",
+    "type-fest": "^4.10.2"
+  }
+}

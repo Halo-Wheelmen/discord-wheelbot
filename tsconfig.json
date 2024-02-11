@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "allowJs": false,
+    "alwaysStrict": true,
+    "declaration": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "lib": ["es2020", "esnext"],
+    "module": "nodenext",
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "outDir": "./dist",
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": false,
+    "target": "es2018"
+  },
+  "include": [
+    "bot/**/*",
+    "spec/**/*",
+    ".eslintrc.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
+  "ts-node": {
+    "files": true
+  }
+}

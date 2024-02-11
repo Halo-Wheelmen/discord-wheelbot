@@ -1,0 +1,35 @@
+{
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "bot"
+    ],
+    "nohoist": [
+      "discord-pin-proxy/**"
+    ]
+  },
+  "scripts": {
+    "start": "node ./bot/app.js",
+    "dev": "nodemon bot/app.js",
+    "lint": "eslint --ext ts bot"
+  },
+  "author": "Jon Peterson",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "aws-cdk": "^2.30.0",
+    "aws-cdk-lib": "^2.30.0",
+    "constructs": "^10.1.43",
+    "eslint": "^8.56.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-chai-friendly": "^0.7.4",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-promise": "^6.1.1",
+    "nodemon": "^2.0.15",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
