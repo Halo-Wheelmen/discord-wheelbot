@@ -7,13 +7,9 @@ import type {
 } from 'discord-api-types/payloads/v10/'
 import { InteractionType } from 'discord-api-types/payloads/v10/'
 
-import { APPLICATION_COMMANDS, installGlobalCommands } from './commands'
+import { APPLICATION_COMMANDS, CommandHelpers } from './commands'
 import {
-  verifyDiscordRequest,
-  Headers,
-  isAPIGuildInteraction,
-  unknownErrorResponse,
-  unknownCommandResponse,
+  Discord,
 } from './utils'
 
 function requireEnv(key: string) {
@@ -26,63 +22,64 @@ function requireEnv(key: string) {
 const APP_ID = requireEnv('APP_ID')
 const PUBLIC_KEY = requireEnv('PUBLIC_KEY')
 
+export class CommandRouter {
+  static async routeRequest(body: APIGuildInteraction | APIPingInteraction) {
+    switch (body.type) {
+      case InteractionType.ApplicationCommand:
+        return this.routeApplicationCommand(body)
+      case InteractionType.Ping:
+        return this.pong()
+      case InteractionType.MessageComponent:
+      case InteractionType.ApplicationCommandAutocomplete:
+      default:
+        return Discord.unknownCommandResponse(body.id)
+    }
+  }
+
+  static async routeApplicationCommand(body: APIApplicationCommandGuildInteraction) {
+    const command = APPLICATION_COMMANDS.get(body.data.name)
+
+    if (!command) return Discord.unknownCommandResponse(body.id)
+    return command.handler(body)
+  }
+
+  static pong() {
+    return {
+      type: InteractionType.Ping,
+    }
+  }
+}
+
 /**
  * The main event handler for the bot
  * @param event An HTTP request event
  */
 export async function handler(event: { headers: Record<string, string>, body: string }) {
-  const headers = new Headers(event.headers)
-  const body = event.body
+  const { body, headers } = event
 
-  if (headers.get('modify-global-commands')) {
-    installGlobalCommands(APP_ID, APPLICATION_COMMANDS.map(c => c.command))
+  if (headers['modify-global-commands']) {
+    await CommandHelpers.installGlobalCommands(APP_ID, APPLICATION_COMMANDS.map(c => c.command))
 
     return {
-      statusCode: 200,
+      type: 999,
       body: 'Commands modified successfully',
     }
   }
 
-  verifyDiscordRequest(PUBLIC_KEY, headers, body)
+  Discord.verifyIncomingRequest(PUBLIC_KEY, headers, body)
 
   const parsedBody: unknown = JSON.parse(body)
   const interactionId = getInteractionId(parsedBody)
   console.log('Received interaction with ID', interactionId)
 
   try {
-    if (!isAPIGuildInteraction(parsedBody)) throw new Error('Invalid interaction')
+    Discord.assertAPIGuildInteraction(parsedBody)
 
-    return await routeRequest(parsedBody)
+    return await CommandRouter.routeRequest(parsedBody)
   } catch (e) {
     console.error(e)
     console.error(body)
-    return unknownErrorResponse(interactionId)
-  }
-}
-
-async function routeRequest(body: APIGuildInteraction | APIPingInteraction) {
-  switch (body.type) {
-    case InteractionType.ApplicationCommand:
-      return routeApplicationCommand(body)
-    case InteractionType.Ping:
-      return pong()
-    case InteractionType.MessageComponent:
-    case InteractionType.ApplicationCommandAutocomplete:
-    default:
-      return unknownCommandResponse(body.id)
-  }
-}
-
-async function routeApplicationCommand(body: APIApplicationCommandGuildInteraction) {
-  const command = APPLICATION_COMMANDS.get(body.data.name)
-
-  if (!command) return unknownCommandResponse(body.id)
-  return command.handler(body)
-}
-
-function pong() {
-  return {
-    type: InteractionType.Ping,
+    return Discord.unknownErrorResponse(interactionId)
   }
 }
 

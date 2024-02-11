@@ -1,35 +1,48 @@
 {
   "private": true,
+  "author": "Jon Peterson",
+  "license": "MIT",
   "workspaces": {
     "packages": [
       "bot"
-    ],
-    "nohoist": [
-      "discord-pin-proxy/**"
+    ]
+  },
+  "mocha": {
+    "require": [
+      "./spec/mocha.mjs",
+      "ts-node/register"
     ]
   },
   "scripts": {
     "start": "node ./bot/app.js",
     "dev": "nodemon bot/app.js",
-    "lint": "eslint --ext ts bot"
+    "lint": "eslint --ext ts bot",
+    "test": "mocha 'spec/**/*.spec.ts'"
   },
-  "author": "Jon Peterson",
-  "license": "MIT",
   "devDependencies": {
+    "@types/chai": "^4.3.11",
+    "@types/mocha": "^10.0.6",
     "@types/node": "^20.11.17",
+    "@types/sinon": "^17.0.3",
+    "@types/sinon-chai": "^3.2.12",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "aws-cdk": "^2.30.0",
     "aws-cdk-lib": "^2.30.0",
+    "chai": "^5.0.3",
     "constructs": "^10.1.43",
+    "discord-api-types": "^0.37.69",
     "eslint": "^8.56.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-chai-friendly": "^0.7.4",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-n": "^16.6.2",
     "eslint-plugin-promise": "^6.1.1",
-    "nodemon": "^2.0.15",
+    "mocha": "^10.3.0",
+    "sinon": "^17.0.1",
+    "sinon-chai": "^3.7.0",
     "ts-node": "^10.9.2",
+    "type-fest": "^4.10.2",
     "typescript": "^5.3.3"
   }
 }

@@ -5,9 +5,9 @@ import type {
   RESTPutAPIChannelPinResult,
 } from 'discord-api-types/v10'
 
-import { auditLogHeader, getChannelAndMessageId } from './helpers'
+import { CommandHelpers } from './helpers'
 import type { IContextMenuCommandDefinition } from '../@types/commands'
-import { discordRequest, ephemeralResponse, unknownErrorResponse } from '../utils'
+import { Discord } from '../utils'
 
 /***********************
  * COMMAND DEFINITIONS *
@@ -23,30 +23,30 @@ export const PIN_COMMAND: IContextMenuCommandDefinition = {
   },
   handler: async function pinMessageCommandHandler(interaction) {
     if (interaction.data.type !== this.command.type) {
-      return unknownErrorResponse(interaction.id)
+      return Discord.unknownErrorResponse(interaction.id)
     }
 
-    const { channelId, messageId } = getChannelAndMessageId(interaction)
-    const matchingPin = await getMatchingPin(channelId, messageId)
+    const { channelId, messageId } = CommandHelpers.getChannelAndMessageId(interaction)
+    const matchingPin = await getMatchingPin(channelId, messageId, interaction.id)
     if (matchingPin) {
-      return ephemeralResponse('This message was already pinned. No action taken.')
+      return Discord.ephemeralResponse('This message was already pinned. No action taken.')
     }
 
-    const [err, res] = await discordRequest<RESTPutAPIChannelPinResult>(
+    const [err, res] = await Discord.sendAPIRequest<RESTPutAPIChannelPinResult>(
       `channels/${channelId}/pins/${messageId}`,
       {
         method: 'PUT',
         headers: {
-          ...auditLogHeader(interaction),
+          ...CommandHelpers.auditLogHeader(interaction),
         },
       },
     )
 
     if (err || res.status !== 204) {
-      return unknownErrorResponse(interaction.id)
+      return Discord.unknownErrorResponse(interaction.id)
     }
 
-    return ephemeralResponse('Pinned added successfully')
+    return Discord.ephemeralResponse('Pinned added successfully')
   },
 }
 
@@ -59,26 +59,26 @@ export const UNPIN_COMMAND: IContextMenuCommandDefinition = {
     type: ApplicationCommandType.Message,
   },
   handler: async function unpinMessageCommandHandler(interaction) {
-    const { channelId, messageId } = getChannelAndMessageId(interaction)
-    const matchingPin = await getMatchingPin(channelId, messageId)
+    const { channelId, messageId } = CommandHelpers.getChannelAndMessageId(interaction)
+    const matchingPin = await getMatchingPin(channelId, messageId, interaction.id)
     if (!matchingPin) {
-      return ephemeralResponse('This message was not in the pins. No action taken.')
+      return Discord.ephemeralResponse('This message was not in the pins. No action taken.')
     }
-    const [err, res] = await discordRequest(
+    const [err, res] = await Discord.sendAPIRequest(
       `channels/${channelId}/pins/${messageId}`,
       {
         method: 'DELETE',
         headers: {
-          ...auditLogHeader(interaction),
+          ...CommandHelpers.auditLogHeader(interaction),
         },
       },
     )
 
     if (err || res.status !== 204) {
-      return unknownErrorResponse(interaction.id)
+      return Discord.unknownErrorResponse(interaction.id)
     }
 
-    return ephemeralResponse('Pin removed successfully')
+    return Discord.ephemeralResponse('Pin removed successfully')
   },
 }
 
@@ -92,14 +92,18 @@ export const UNPIN_COMMAND: IContextMenuCommandDefinition = {
  * @param messageId The message ID to search for
  * @returns A pin ID if found, otherwise undefined
  */
-async function getMatchingPin(channelId: Snowflake, messageId: Snowflake) {
-  const [err, res] = await discordRequest<RESTGetAPIChannelPinsResult>(
+async function getMatchingPin(
+  channelId: Snowflake,
+  messageId: Snowflake,
+  interactionId: Snowflake,
+) {
+  const [err, res] = await Discord.sendAPIRequest<RESTGetAPIChannelPinsResult>(
     `channels/${channelId}/pins`,
     { method: 'GET' },
   )
 
   if (err || !Array.isArray(res.data)) {
-    return unknownErrorResponse
+    return Discord.unknownErrorResponse(interactionId)
   }
 
   return res.data.find((pin) => pin.id === messageId)

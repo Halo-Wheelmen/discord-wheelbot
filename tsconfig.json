@@ -7,7 +7,8 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "lib": ["es2020", "esnext"],
-    "module": "nodenext",
+    "module": "commonjs",
+    "moduleResolution": "node",
     "noEmitOnError": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
@@ -17,11 +18,11 @@
     "noUnusedParameters": true,
     "outDir": "./dist",
     "resolveJsonModule": true,
-    "sourceMap": true,
+    "sourceMap": false,
     "strict": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": false,
-    "target": "es2018"
+    "target": "es2020"
   },
   "include": [
     "bot/**/*",
@@ -30,6 +31,7 @@
   ],
   "exclude": [
     "node_modules",
+    "cdk.out",
     "dist"
   ],
   "ts-node": {

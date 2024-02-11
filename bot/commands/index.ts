@@ -6,9 +6,9 @@ import type {
   IContextMenuCommandDefinition,
   CommandDefinition,
 } from '../@types/commands'
-import { ephemeralResponse } from '../utils'
+import { Discord } from '../utils'
 
-export { installGlobalCommands } from './helpers'
+export { CommandHelpers } from './helpers'
 
 class CommandDefinitions extends Array<CommandDefinition> {
   constructor(...definitions: CommandDefinition[]) {
@@ -31,7 +31,7 @@ export const HELP_COMMAND = {
     type: ApplicationCommandType.ChatInput,
   },
   handler: function helpCommandHandler(_: unknown) {
-    return ephemeralResponse(
+    return Discord.ephemeralResponse(
       "Right-click on a message, and find this bot's commands under Apps.",
     )
   },
